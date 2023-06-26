@@ -97,7 +97,7 @@ While you can write one ```TEST_CASE``` for each type you want to test (and you 
 
 Templated tests allow you to repeat the same test logic over a list of types. You only need to write the test logic once.
 
-There are 2 ways to do it:
+There are 3 ways to do it:
 
 - directly pass the list of types to the templated test case
 
@@ -108,6 +108,19 @@ There are 2 ways to do it:
         CHECK(var == -1);
     }
     ```
+
+- pass the list of types to the templated test case via the `std::tuple<>` class template
+
+    ```c++
+    using integral_types = std::tuple<char, short, int, long long int>;
+
+    TEST_CASE_TEMPLATE_TUPLE("signed integers stuff", T, integral_types) {
+        T var = T();
+        --var;
+        CHECK(var == -1)
+    }
+    ```
+    If you are defining a concept, which a known set of types must model, then you can create a single type alias representing that set of types and reuse it in all tests verifying different requirements of that concept.
 
 - define the templated test case with a specific unique name (identifier) for later instantiation
 
@@ -151,17 +164,17 @@ Some notes:
     template <typename first, typename second>
     struct TypePair
     {
-        typedef first  A;
-        typedef second B;
+        using A = first;
+        using B = second;
     };
 
-    #define pairs \
-        TypePair<int, char>, \
-        TypePair<char, int>
+    using pairs = std::tuple<TypePair<int, char>,
+                             TypePair<char, int>,
+                             TypePair<bool, int>>;
 
-    TEST_CASE_TEMPLATE("multiple types", T, pairs) {
-        typedef typename T::A T1;
-        typedef typename T::B T2;
+    TEST_CASE_TEMPLATE_TUPLE("multiple types", T, pairs) {
+        using T1 = typename T::A;
+        using T2 = typename T::B;
         // use T1 and T2 types
     }
     ```

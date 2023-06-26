@@ -2265,14 +2265,17 @@ int registerReporter(const char* name, int priority, bool isReporter) {
     DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(id, DOCTEST_ANONYMOUS(DOCTEST_ANON_TMP_), __VA_ARGS__) \
     static_assert(true, "")
 
-#define DOCTEST_TEST_CASE_TEMPLATE_IMPL(dec, T, anon, ...)                                         \
+#define DOCTEST_TEST_CASE_TEMPLATE_TUPLE_IMPL(dec, T, anon, ...)                                   \
     DOCTEST_TEST_CASE_TEMPLATE_DEFINE_IMPL(dec, T, DOCTEST_CAT(anon, ITERATOR), anon);             \
-    DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(anon, anon, std::tuple<__VA_ARGS__>)               \
+    DOCTEST_TEST_CASE_TEMPLATE_INSTANTIATE_IMPL(anon, anon, __VA_ARGS__)                           \
     template <typename T>                                                                          \
     static void anon()
 
+#define DOCTEST_TEST_CASE_TEMPLATE_TUPLE(dec, T, ...)                                              \
+    DOCTEST_TEST_CASE_TEMPLATE_TUPLE_IMPL(dec, T, DOCTEST_ANONYMOUS(DOCTEST_ANON_TMP_), __VA_ARGS__)
+
 #define DOCTEST_TEST_CASE_TEMPLATE(dec, T, ...)                                                    \
-    DOCTEST_TEST_CASE_TEMPLATE_IMPL(dec, T, DOCTEST_ANONYMOUS(DOCTEST_ANON_TMP_), __VA_ARGS__)
+    DOCTEST_TEST_CASE_TEMPLATE_TUPLE(dec, T, std::tuple<__VA_ARGS__>)
 
 // for subcases
 #define DOCTEST_SUBCASE(name)                                                                      \
@@ -2603,6 +2606,10 @@ int registerReporter(const char* name, int priority, bool isReporter) {
     template <typename type>                                                                       \
     inline void DOCTEST_ANONYMOUS(DOCTEST_ANON_TMP_)()
 
+#define DOCTEST_TEST_CASE_TEMPLATE_TUPLE(name, type, ...)                                          \
+    template <typename type>                                                                       \
+    inline void DOCTEST_ANONYMOUS(DOCTEST_ANON_TMP_)()
+
 #define DOCTEST_TEST_CASE_TEMPLATE_DEFINE(name, type, id)                                          \
     template <typename type>                                                                       \
     inline void DOCTEST_ANONYMOUS(DOCTEST_ANON_TMP_)()
@@ -2921,6 +2928,7 @@ namespace detail {
 #define DOCTEST_SCENARIO(name) DOCTEST_TEST_CASE("  Scenario: " name)
 #define DOCTEST_SCENARIO_CLASS(name) DOCTEST_TEST_CASE_CLASS("  Scenario: " name)
 #define DOCTEST_SCENARIO_TEMPLATE(name, T, ...)  DOCTEST_TEST_CASE_TEMPLATE("  Scenario: " name, T, __VA_ARGS__)
+#define DOCTEST_SCENARIO_TEMPLATE_TUPLE(name, T, ...)  DOCTEST_TEST_CASE_TEMPLATE_TUPLE("  Scenario: " name, T, __VA_ARGS__)
 #define DOCTEST_SCENARIO_TEMPLATE_DEFINE(name, T, id) DOCTEST_TEST_CASE_TEMPLATE_DEFINE("  Scenario: " name, T, id)
 
 #define DOCTEST_GIVEN(name)     DOCTEST_SUBCASE("   Given: " name)
@@ -2939,6 +2947,7 @@ namespace detail {
 #define TYPE_TO_STRING_AS(str, ...) DOCTEST_TYPE_TO_STRING_AS(str, __VA_ARGS__)
 #define TYPE_TO_STRING(...) DOCTEST_TYPE_TO_STRING(__VA_ARGS__)
 #define TEST_CASE_TEMPLATE(name, T, ...) DOCTEST_TEST_CASE_TEMPLATE(name, T, __VA_ARGS__)
+#define TEST_CASE_TEMPLATE_TUPLE(id, T, ...) DOCTEST_TEST_CASE_TEMPLATE_TUPLE(id, T, __VA_ARGS__)
 #define TEST_CASE_TEMPLATE_DEFINE(name, T, id) DOCTEST_TEST_CASE_TEMPLATE_DEFINE(name, T, id)
 #define TEST_CASE_TEMPLATE_INVOKE(id, ...) DOCTEST_TEST_CASE_TEMPLATE_INVOKE(id, __VA_ARGS__)
 #define TEST_CASE_TEMPLATE_APPLY(id, ...) DOCTEST_TEST_CASE_TEMPLATE_APPLY(id, __VA_ARGS__)
@@ -3006,6 +3015,7 @@ namespace detail {
 #define SCENARIO(name) DOCTEST_SCENARIO(name)
 #define SCENARIO_CLASS(name) DOCTEST_SCENARIO_CLASS(name)
 #define SCENARIO_TEMPLATE(name, T, ...) DOCTEST_SCENARIO_TEMPLATE(name, T, __VA_ARGS__)
+#define SCENARIO_TEMPLATE_TUPLE(name, T, ...) DOCTEST_SCENARIO_TEMPLATE_TUPLE(name, T, __VA_ARGS__)
 #define SCENARIO_TEMPLATE_DEFINE(name, T, id) DOCTEST_SCENARIO_TEMPLATE_DEFINE(name, T, id)
 #define GIVEN(name) DOCTEST_GIVEN(name)
 #define WHEN(name) DOCTEST_WHEN(name)

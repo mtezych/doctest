@@ -2,10 +2,11 @@
 
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_BEGIN
 #include <vector>
+#include <array>
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_END
 
 // =================================================================================================
-// NORMAL TEMPLATED TEST CASES
+// LIST TEMPLATED TEST CASES
 // =================================================================================================
 
 TYPE_TO_STRING_AS("SHORT!!!", short);
@@ -22,6 +23,27 @@ TYPE_TO_STRING(std::vector<int>);
 TEST_CASE_TEMPLATE("vector stuff", T, std::vector<int>) {
     T vec(10);
     CHECK(vec.size() == 20); // will fail
+}
+
+// =================================================================================================
+// TEMPLATED TEST CASES PARAMETERIZED WITH TYPES OF TUPLE ELEMENTS
+// =================================================================================================
+
+using sequences = std::tuple<std::vector<int>, std::array<int, 4>>;
+
+TEST_CASE_TEMPLATE_TUPLE("list-initialize a sequence", T, sequences) {
+    const T sequence = { 1, 2, 3, 4 };
+    CHECK(sequence.size() == 4);
+}
+
+TEST_CASE_TEMPLATE_TUPLE("iterate over a sequence", T, sequences) {
+    const T sequence = { 1, 2, 3, 4 };
+    std::size_t iteration = 0;
+    for (const auto element : sequence) {
+        ++iteration;
+        CHECK(iteration == element);
+    }
+    CHECK(iteration == sequence.size());
 }
 
 // =================================================================================================
@@ -53,12 +75,16 @@ TYPE_TO_STRING_AS("Custom name test", TypePair<int, char>);
 TYPE_TO_STRING_AS("Other custom name", TypePair<char, int>);
 TYPE_TO_STRING(TypePair<bool, int>);
 
-TEST_CASE_TEMPLATE("multiple types", T, TypePair<int, char>, TypePair<char, int>, TypePair<bool, int>) {
+using pairs = std::tuple<TypePair<int, char>,
+                         TypePair<char, int>,
+                         TypePair<bool, int>>;
+
+TEST_CASE_TEMPLATE_TUPLE("multiple types", T, pairs) {
     using T1 = typename T::A;
     using T2 = typename T::B;
+    // use T1 and T2 types
     T1 t1 = T1();
     T2 t2 = T2();
-    // use T1 and T2 types
     CHECK(t1 == T1());
     CHECK(t2 != T2());
 }
@@ -70,9 +96,9 @@ TYPE_TO_STRING(int_pair);
 TEST_CASE_TEMPLATE("bad stringification of type pair", T, int_pair) {
     using T1 = typename T::A;
     using T2 = typename T::B;
+    // use T1 and T2 types
     T1 t1 = T1();
     T2 t2 = T2();
-    // use T1 and T2 types
     CHECK(t1 == T1());
     CHECK(t2 != T2());
 }
